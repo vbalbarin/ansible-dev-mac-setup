@@ -1,0 +1,5 @@
+# file: ~/.config/zsh/config.d/10_brew.zsh
+
+# Set PATH, MANPATH, etc., for Homebrew.
+export HOMEBREW_CACHE="{{ homebrew_cache }}"
+eval "$(/opt/homebrew/bin/brew shellenv)"

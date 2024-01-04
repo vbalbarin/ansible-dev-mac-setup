@@ -1,0 +1,14 @@
+# file ~/.config/zsh/.zshrc
+
+# Set environment for interactive sessions
+export EDITOR="vim"
+export VISUAL="code"
+
+export SHELL_SESSIONS_DISABLE=1
+
+export HISTFILE="${XDG_STATE_HOME}/zsh/.zsh_history"    # History filepath
+export HISTSIZE=12000                   # Maximum events for internal history
+export SAVEHIST=10000                   # Maximum events in history file
+
+[[ ! -d "${XDG_STATE_HOME}/less" ]] && mkdir "${XDG_STATE_HOME}/less"
+export LESSHISTFILE="${XDG_STATE_HOME}/less/lesshst"

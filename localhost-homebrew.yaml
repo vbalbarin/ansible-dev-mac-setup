@@ -1,0 +1,137 @@
+---
+- hosts: 127.0.0.1
+  gather_facts: true
+  vars:
+    home: "{{ lookup('env', 'HOME') }}"
+    xdg_config_home: "{{ home }}/.config"
+    xdg_data_home: "{{ home }}/.local/share"
+    xdg_state_home: "{{ home }}/.local/state"
+    xdg_cache_home: "{{ home }}/.cache"
+    homebrew_git_remote: "https://github.com/Homebrew/brew"
+    homebrew_core_git_remote: "https://github.com/Homebrew/homebrew-core"
+
+  tasks:
+
+  - name: username
+    ansible.builtin.shell: id -un | xargs -I_ printf "%s" _
+    register: username
+
+  - name: set user
+    ansible.builtin.set_fact:
+      user: "{{ username.stdout }}"
+
+  - name: debug user
+    ansible.builtin.debug:
+      msg: I am using username {{ user }}
+
+  - name: set homebrew base paths if apple si
+    ansible.builtin.set_fact:
+      homebrew_prefix: "/opt/homebrew"
+      homebrew_repository: "/opt/homebrew"
+    when: >
+      (ansible_facts['os_family'] == "Darwin") and
+      (ansible_facts['architecture'] == "arm64")
+
+  - name: set homebrew base paths if apple intel
+    ansible.builtin.set_fact:
+      homebrew_prefix: "/usr/local"
+      homebrew_repository: "/usr/local/Homebrew"
+    when: >
+      (ansible_facts['os_family'] == "Darwin") and
+      (ansible_facts['architecture'] == "x86_64")
+
+  - name: set homebrew cache path
+    ansible.builtin.set_fact:
+      homebrew_cache: "{{ xdg_cache_home }}/Homebrew"
+      #homebrew_cache: "{{ home }}/Library/Caches/Homebrew"
+
+  - name: purged homebrew cache directory
+    ansible.builtin.file:
+      path: "{{ homebrew_cache }}"
+      state: absent
+
+  - name: homebrew base directories
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      owner: "{{ user }}"
+      group: admin
+      mode: "775"
+      recurse: true
+    become: true
+    loop:
+    - "{{ homebrew_prefix }}"
+    - "{{ homebrew_repository }}"
+    - "{{ homebrew_cache }}"
+
+  - name: initialized homebrew cache
+    ansible.builtin.file:
+      path: "{{ homebrew_cache }}/.cleaned"
+      state: touch
+      mode: "664"
+
+  - name: homebrew group writable subdirectories
+    ansible.builtin.file:
+      path: "{{ homebrew_prefix }}/{{ item }}"
+      state: directory
+      owner: "{{ user }}"
+      group: admin
+      mode: '775'
+      recurse: true
+    loop:
+    - bin 
+    - etc
+    - include
+    - lib
+    - sbin
+    - share
+    - opt
+    - var/homebrew
+    - var/homebrew/linked
+    - Cellar
+    - Caskroom
+    - Frameworks
+
+  - name: homebrew user-only writable subdirectories
+    ansible.builtin.file:
+      path: "{{ homebrew_prefix }}/{{ item }}"
+      state: directory
+      owner: "{{ user }}"
+      group: admin
+      mode: '755'
+      recurse: true
+    loop:
+    - share/zsh
+    - share/zsh/site-functions
+
+  - name: initialized homebrew repo
+    ansible.builtin.shell: |
+      git -c init.defaultBranch=master init
+      git config remote.origin.url "{{ homebrew_git_remote }}"
+      git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+      git config --bool core.autocrlf false
+      git config --bool core.symlinks true
+      git fetch --force origin
+      git fetch --force --tags origin
+      git reset --hard origin/master
+    args:
+      chdir: "{{ homebrew_repository }}"
+      creates: LICENSE.txt
+
+  - name: symlink brew on intel
+    ansible.builtin.file:
+      src: "{{ homebrew_repository }}/bin/homebrew"
+      dest: "{{ homebrew_prefix }}/bin/homebrew"
+      state: link 
+      group: admin
+      mode: '775'
+      force: true
+    when: >
+      (ansible_facts['os_family'] == "Darwin") and
+      (ansible_facts['architecture'] == "x86_64")
+
+
+  - name: osx homebrew
+    ansible.builtin.template:
+      src: "./files/10_brew.zsh.j2"
+      dest: "{{ xdg_config_home }}/zsh/config.d/10_brew.zsh"

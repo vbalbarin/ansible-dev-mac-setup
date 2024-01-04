@@ -1,0 +1,9 @@
+# file: ~/.config/zsh/.zprofile"
+
+# Source application specific configurations
+IFS=$'\n'
+# sorted by basename
+app_configs=( $(find ${XDG_CONFIG_HOME}/zsh/config.d -type f -name '*.zsh' -exec basename "{}" \; | sort) )
+unset IFS
+
+for file in ${app_configs[*]}; do source "${XDG_CONFIG_HOME}/zsh/config.d/$file"; done
