@@ -1,0 +1,10 @@
+---
+# defaults file for macos-laptop
+
+home: "{{ lookup('env', 'HOME') }}"
+xdg_config_home: "{{ home }}/.config"
+xdg_data_home: "{{ home }}/.local/share"
+xdg_state_home: "{{ home }}/.local/state"
+xdg_cache_home: "{{ home }}/.cache"
+homebrew_git_remote: "https://github.com/Homebrew/brew"
+homebrew_core_git_remote: "https://github.com/Homebrew/homebrew-core"
