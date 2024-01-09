@@ -1,6 +1,12 @@
-# OSX XDG
+# Configure MacOS X Laptop
 
-Make sure your user is a member of `admin`
+Make sure your user is a member of `admin`.
+
+The MacOS X Command Line Tools (CLT) are required.
+
+```shell
+sudo bash ./bin/install_osx_clt.sh
+```
 
 
 ```shell
