@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  gather_facts: true
+  vars_files: confidential.yml
+  roles:
+  - macos-base
+  - macos-zoom-kiosk

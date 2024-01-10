@@ -1,0 +1,10 @@
+---
+# tasks file for macos-zoom-kiosk
+
+- name: create kiosk user
+  ansible.builtin.user:
+    name: "{{ user_accountname }}"
+    comment: "{{ user_fullname }}"
+    uid: 502
+    password: "{{ user_password }}"
+  become: true
