@@ -1,3 +1,6 @@
 **/.DS_Store
 **/.venv
 **/venv
+
+**/confidential.yml
+**/confidential.yaml
