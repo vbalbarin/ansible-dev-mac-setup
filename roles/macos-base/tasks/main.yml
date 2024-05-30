@@ -145,7 +145,7 @@
     recurse: true
   become: true
   loop:
-  - "{{ homebrew_prefix }}"
+  #  - "{{ homebrew_prefix }}"
   - "{{ homebrew_repository }}"
   - "{{ homebrew_cache }}"
 
@@ -165,6 +165,7 @@
     group: admin
     mode: '775'
     recurse: true
+  become: true
   loop:
   - bin 
   - etc
@@ -207,13 +208,14 @@
 
 - name: symlink brew on intel
   ansible.builtin.file:
-    src: "{{ homebrew_repository }}/bin/homebrew"
-    dest: "{{ homebrew_prefix }}/bin/homebrew"
+    src: "{{ homebrew_repository }}/bin/brew"
+    dest: "{{ homebrew_prefix }}/bin/brew"
     state: link 
     owner: "{{ user }}"
     group: admin
     mode: '775'
     force: true
+  become: true
   when: >
     (ansible_facts['os_family'] == "Darwin") and
     (ansible_facts['architecture'] == "x86_64")
@@ -237,6 +239,6 @@
   - iterm2
   - visual-studio-code
   - firefox
-  - microsoft-edge
-  - zoom
+  # - microsoft-edge
+  # - zoom
 
