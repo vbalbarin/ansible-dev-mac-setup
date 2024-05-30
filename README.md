@@ -22,6 +22,8 @@ Create secrets to be used.
 
 ```shell
 ansible_secret_dir="${HOME}/.ansible/etc"
+
+# Details for ensuring that the user account exists
 user_accountname="{{ UserAccountName }}"
 user_fullname="{{ FirstAndLastSpaceSeparated }}"
 user_password="{{ UserPassword }}"
@@ -33,6 +35,8 @@ printf '%s' "{{ YourAnsibleVaultPassword }}" | tee "${ansible_secret_dir}/vault_
 
 printf 'user_accountname: "%s"\n' "${user_accountname}" | tee confidential.yml
 printf 'user_fullname: "%s"\n' "${user_fullname}" | tee -a confidential.yml
+
+# Encrypt the password field
 ansible-vault encrypt_string --vault-id "${ansible_secret_dir}/vault_secret.txt" --name 'user_password' "${user_password}" >> confidential.yml 
 
 ```
@@ -40,7 +44,8 @@ ansible-vault encrypt_string --vault-id "${ansible_secret_dir}/vault_secret.txt"
 
 ```shell
 ansible-playbook \
+  --connection local \
   --ask-become-pass \
   --vault-id user_password@"${ansible_secret_dir}/vault_secret.txt" \
- conference_room_kiosk.yml 
+  dev-laptop.yml 
 ```
